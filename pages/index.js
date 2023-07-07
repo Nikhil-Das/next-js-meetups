@@ -1,61 +1,76 @@
-import { Fragment } from 'react';
-import Head from 'next/head';
-import { MongoClient } from 'mongodb';
+// import { useEffect, useState } from "react";
+import { MongoClient } from "mongodb";
+import Head from "next/head";
+import MeetUpList from "../components/meetups/MeetupList";
 
-import MeetupList from '../components/meetups/MeetupList';
+// const list = [
+//   {
+//     id: "1",
+//     image: "https://picsum.photos/id/10/1280/960",
+//     title: "Meetup 1",
+//     address: "Address 1",
+//     description: "First Meetup!",
+//   },
+//   {
+//     id: "2",
+//     image: "https://picsum.photos/id/16/1280/960",
+//     title: "Meetup 2",
+//     address: "Address 2",
+//     description: "Second Meetup!",
+//   },
+// ];
 
-function HomePage(props) {
+const Home = (props) => {
+  //   const [meetups, setMeetups] = useState([]);
+  //   useEffect(() => {
+  //     setMeetups(list);
+  //   }, []);
+
   return (
-    <Fragment>
+    <>
       <Head>
-        <title>React Meetups</title>
-        <meta
-          name='description'
-          content='Browse a huge list of highly active React meetups!'
-        />
+        <title>Meetups</title>
+        <meta name="description" content="Browse the meetups"></meta>
       </Head>
-      <MeetupList meetups={props.meetups} />;
-    </Fragment>
+      <MeetUpList meetups={props.meetups} />
+    </>
   );
-}
-
-// export async function getServerSideProps(context) {
-//   const req = context.req;
-//   const res = context.res;
-
-//   // fetch data from an API
-
-//   return {
-//     props: {
-//       meetups: DUMMY_MEETUPS
-//     }
-//   };
-// }
+};
 
 export async function getStaticProps() {
-  // fetch data from an API
+  //Fetch the data during pre rendering of the application on server side
   const client = await MongoClient.connect(
-    'mongodb+srv://maximilian:TU6WdZF2EjFWsqUt@cluster0.ntrwp.mongodb.net/meetups?retryWrites=true&w=majority'
+    "mongodb+srv://gnikhildas98:8uYTJgrUzjAIDyxa@cluster0.gidmgfr.mongodb.net/meetups?retryWrites=true&w=majority"
   );
   const db = client.db();
 
-  const meetupsCollection = db.collection('meetups');
-
-  const meetups = await meetupsCollection.find().toArray();
+  const meetupsCollection = db.collection("meetups");
+  const meetupsList = await meetupsCollection.find().toArray();
 
   client.close();
 
   return {
     props: {
-      meetups: meetups.map((meetup) => ({
+      meetups: meetupsList.map((meetup) => ({
         title: meetup.title,
-        address: meetup.address,
         image: meetup.image,
+        address: meetup.address,
         id: meetup._id.toString(),
       })),
     },
-    revalidate: 1,
+    revalidate: 1, // number of seconds to reload the page
   };
 }
 
-export default HomePage;
+// export async function getServerSideProps(context) {
+//   const req = context.req;
+//   const res = context.res;
+//   //Fetch the data during pre rendering of the application on server side
+//   return {
+//     props: {
+//       meetups: list,
+//     },
+//   };
+// }
+
+export default Home;
